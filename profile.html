@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GeoAlert — Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#080c10;--surf:#0e1419;--surf2:#141c24;--border:#1e2d3d;--accent:#f5a623;--red:#ff4455;--green:#06d6a0;--text:#d4e4f7;--muted:#5a7a99;--head:'Bebas Neue',sans-serif;--body:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;}
+header{background:rgba(8,12,16,0.95);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand{font-family:var(--head);font-size:28px;color:var(--accent);}
+.nav-link{color:var(--muted);text-decoration:none;font-family:var(--mono);font-size:11px;padding:6px 14px;border:1px solid var(--border);border-radius:6px;margin-left:8px;}
+.nav-link:hover{color:var(--accent);border-color:var(--accent);}
+.main{max-width:600px;margin:40px auto;padding:0 24px;}
+.box{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:32px;}
+h2{font-family:var(--head);font-size:24px;color:var(--accent);margin-bottom:24px;}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;font-family:var(--mono);}
+input{width:100%;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:13px;outline:none;margin-bottom:16px;}
+input:focus{border-color:var(--accent);}
+input[readonly]{opacity:0.5;cursor:not-allowed;}
+.btn{background:linear-gradient(135deg,var(--accent),#ff7a2f);border:none;color:#000;padding:10px 24px;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;}
+.flash{padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;}
+.flash.success{background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);color:var(--green);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">🌐 GeoAlert</div>
+  <div>
+    <a href="/" class="nav-link">← Dashboard</a>
+    <a href="/logout" class="nav-link">Logout</a>
+  </div>
+</header>
+<div class="main">
+  <div class="box">
+    <h2>My Profile</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="POST">
+      <label>Username</label>
+      <input type="text" value="{{ user.username }}" readonly/>
+      <label>Email</label>
+      <input type="email" value="{{ user.email }}" readonly/>
+      <label>Alert Email (for critical event notifications)</label>
+      <input type="email" name="alert_email" value="{{ user.alert_email or '' }}" placeholder="your@email.com"/>
+      <button class="btn" type="submit">Save Changes</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>
