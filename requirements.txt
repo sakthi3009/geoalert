@@ -1,3 +1,5 @@
 flask
 feedparser
-apscheduler
+flask-login
+werkzeug
+gunicorn
