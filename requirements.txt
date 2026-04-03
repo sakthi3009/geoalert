@@ -1,0 +1,5 @@
+flask
+feedparser
+flask-login
+werkzeug
+gunicorn
