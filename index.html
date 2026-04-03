@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GeoAlert — Smart Commodity Price Impact Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#080c10;--surf:#0e1419;--surf2:#141c24;--surf3:#1a2535;--border:#1e2d3d;--accent:#f5a623;--orange:#ff7a2f;--blue:#3b9eff;--red:#ff4455;--yellow:#ffd166;--green:#06d6a0;--text:#d4e4f7;--muted:#5a7a99;--head:'Bebas Neue',sans-serif;--body:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;}
+header{position:sticky;top:0;z-index:200;background:rgba(8,12,16,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand-name{font-family:var(--head);font-size:28px;letter-spacing:2px;color:var(--accent);}
+.brand-tag{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.live-pill{display:flex;align-items:center;gap:6px;background:rgba(255,68,85,0.1);border:1px solid rgba(255,68,85,0.3);color:var(--red);padding:5px 12px;border-radius:20px;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;}
+.live-dot{width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.nav-link{color:var(--muted);text-decoration:none;font-family:var(--mono);font-size:11px;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all 0.2s;}
+.nav-link:hover{color:var(--accent);border-color:var(--accent);}
+.main{max-width:1300px;margin:0 auto;padding:28px 24px;}
+.sec-head{font-family:var(--head);font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.sec-head::after{content:'';flex:1;height:1px;background:var(--border);}
+.alert-banner{background:linear-gradient(135deg,rgba(255,68,85,0.12),rgba(255,122,47,0.08));border:1px solid rgba(255,68,85,0.35);border-radius:12px;padding:16px 24px;margin-bottom:28px;display:flex;align-items:center;gap:16px;}
+.alert-icon{font-size:28px;}
+.alert-title{font-family:var(--head);font-size:20px;color:var(--red);margin-bottom:4px;}
+.alert-desc{font-size:13px;color:var(--text);opacity:0.85;}
+.alert-btn{background:var(--red);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:var(--mono);font-size:11px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.stat-card.o::after{background:linear-gradient(to right,var(--accent),var(--orange));}
+.stat-card.r::after{background:linear-gradient(to right,var(--red),var(--orange));}
+.stat-card.b::after{background:linear-gradient(to right,var(--blue),#7b61ff);}
+.stat-num{font-family:var(--head);font-size:40px;color:var(--accent);}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+.commodity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:28px;}
+.comm-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all 0.25s;}
+.comm-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.comm-icon{font-size:24px;margin-bottom:8px;}
+.comm-name{font-family:var(--head);font-size:16px;color:var(--text);margin-bottom:4px;}
+.comm-price{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:6px;}
+.comm-reason{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:10px;}
+.impact-badge{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:1px;display:inline-block;margin-bottom:8px;}
+.impact-critical{background:rgba(255,68,85,0.15);color:var(--red);border:1px solid rgba(255,68,85,0.3);}
+.impact-high{background:rgba(255,122,47,0.15);color:var(--orange);border:1px solid rgba(255,122,47,0.3);}
+.impact-medium{background:rgba(255,209,102,0.15);color:var(--yellow);border:1px solid rgba(255,209,102,0.3);}
+.impact-low{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.3);}
+.comm-btn{background:var(--surf3);border:1px solid var(--border);color:var(--accent);padding:6px 12px;border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;width:100%;transition:all 0.2s;text-decoration:none;display:block;text-align:center;}
+.comm-btn:hover{background:var(--accent);color:#000;}
+.grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:28px;}
+.panel{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.panel-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surf2);}
+.panel-title{font-family:var(--head);font-size:16px;letter-spacing:2px;}
+.panel-count{font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--surf3);padding:3px 10px;border-radius:12px;border:1px solid var(--border);}
+.news-list{max-height:500px;overflow-y:auto;}
+.news-item{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;cursor:pointer;transition:background 0.2s;}
+.news-item:hover{background:var(--surf2);}
+.sev-bar{width:3px;min-height:40px;border-radius:2px;flex-shrink:0;}
+.sev-critical{background:var(--red);}
+.sev-high{background:var(--orange);}
+.sev-medium{background:var(--yellow);}
+.sev-normal{background:var(--green);}
+.news-title{font-size:13px;font-weight:500;line-height:1.45;margin-bottom:6px;}
+.news-meta{display:flex;gap:8px;flex-wrap:wrap;}
+.news-source{font-family:var(--mono);font-size:10px;color:var(--blue);}
+.news-time{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.news-cat{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;background:var(--surf3);color:var(--muted);text-transform:uppercase;}
+.news-impact{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(245,166,35,0.1);color:var(--accent);border:1px solid rgba(245,166,35,0.2);}
+.rec-list{padding:12px;}
+.rec-item{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
+.rec-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.rec-name{font-family:var(--head);font-size:16px;}
+.rec-urg{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:1px;}
+.urg-now{background:rgba(255,68,85,0.15);color:var(--red);border:1px solid rgba(255,68,85,0.3);}
+.urg-soon{background:rgba(255,122,47,0.15);color:var(--orange);border:1px solid rgba(255,122,47,0.3);}
+.rec-reason{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+.rec-btn{background:linear-gradient(135deg,var(--accent),var(--orange));border:none;color:#000;padding:8px 16px;border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;width:100%;text-decoration:none;display:block;text-align:center;}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.search-inp{flex:1;min-width:200px;background:var(--surf);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-family:var(--mono);font-size:12px;outline:none;}
+.search-inp:focus{border-color:var(--accent);}
+.search-inp::placeholder{color:var(--muted);}
+.filt-btn{background:var(--surf);border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:11px;transition:all 0.2s;}
+.filt-btn:hover,.filt-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}
+.ref-btn{background:linear-gradient(135deg,var(--accent),var(--orange));border:none;color:#000;padding:9px 20px;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;}
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer{border-top:1px solid var(--border);padding:16px 32px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);}
+footer span{color:var(--accent);}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand-name">🌐 GeoAlert</div>
+    <div class="brand-tag">Smart Commodity Price Impact Monitor</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+    <a href="/history" class="nav-link">📋 History</a>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ALERT BANNER -->
+  <div class="alert-banner">
+    <div class="alert-icon">⚠️</div>
+    <div style="flex:1">
+      <div class="alert-title">CRITICAL PRICE IMPACT DETECTED</div>
+      <div class="alert-desc">Global events detected that may affect LPG & Fuel prices in India. <strong>Take action now!</strong></div>
+    </div>
+    <a href="https://www.mylpg.in" target="_blank" class="alert-btn">📦 BOOK LPG NOW</a>
+  </div>
+
+  <!-- STATS -->
+  <div class="sec-head">Live Intelligence</div>
+  <div class="grid-3">
+    <div class="stat-card o">
+      <div style="font-size:22px;margin-bottom:8px;">📰</div>
+      <div class="stat-num" id="s-total">—</div>
+      <div class="stat-label">Total Articles</div>
+    </div>
+    <div class="stat-card r">
+      <div style="font-size:22px;margin-bottom:8px;">🚨</div>
+      <div class="stat-num" id="s-critical">—</div>
+      <div class="stat-label">Critical Events</div>
+    </div>
+    <div class="stat-card b">
+      <div style="font-size:22px;margin-bottom:8px;">🛒</div>
+      <div class="stat-num" id="s-recs">—</div>
+      <div class="stat-label">Buy Alerts</div>
+    </div>
+  </div>
+
+  <!-- COMMODITY IMPACT -->
+  <div class="sec-head">Commodity Impact Tracker</div>
+  <div class="commodity-grid" id="commodity-grid">
+    <div class="loading" style="grid-column:1/-1"><div class="spinner"></div><p>Analyzing commodities...</p></div>
+  </div>
+
+  <!-- NEWS + RECS -->
+  <div class="grid-2">
+    <div>
+      <div class="sec-head">Global Event Feed</div>
+      <div class="controls">
+        <input type="text" class="search-inp" id="search" placeholder="🔍 Search events..." oninput="filterNews()"/>
+        <button class="filt-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filt-btn" onclick="setFilter('conflict',this)">🔫 Conflict</button>
+        <button class="filt-btn" onclick="setFilter('energy',this)">⚡ Energy</button>
+        <button class="filt-btn" onclick="setFilter('economy',this)">💹 Economy</button>
+        <button class="filt-btn" onclick="setFilter('disaster',this)">🌀 Disaster</button>
+        <button class="ref-btn" onclick="loadNews()">↻ Refresh</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">LATEST ALERTS</span>
+          <span class="panel-count" id="news-count">0 events</span>
+        </div>
+        <div class="news-list" id="news-list">
+          <div class="loading"><div class="spinner"></div><p>Fetching intelligence...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-head">Smart Buy Recommendations</div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">ACTION ALERTS</span>
+          <span class="panel-count" id="rec-count">0 alerts</span>
+        </div>
+        <div class="rec-list" id="rec-list">
+          <div class="loading"><div class="spinner"></div><p>Analyzing...</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>GeoAlert &mdash; <span>MCA Major Project</span> &mdash; AI-Powered Global Event → Commodity Price Intelligence</footer>
+
+<script>
+let allNews = [];
+let activeFilter = 'all';
+
+async function loadNews() {
+  document.getElementById('news-list').innerHTML = '<div class="loading"><div class="spinner"></div><p>Fetching...</p></div>';
+  try {
+    const res = await fetch('/api/news');
+    allNews = await res.json();
+    renderNews();
+    updateStats();
+  } catch(e) {
+    document.getElementById('news-list').innerHTML = '<div class="loading"><p>Error loading news.</p></div>';
+  }
+}
+
+async function loadCommodities() {
+  try {
+    const res = await fetch('/api/commodities');
+    const data = await res.json();
+    renderCommodities(data);
+    renderRecommendations(data);
+  } catch(e) {}
+}
+
+function renderNews() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = allNews.filter(a => {
+    const mq = !q || a.title.toLowerCase().includes(q);
+    const mf = activeFilter === 'all' || a.category === activeFilter;
+    return mq && mf;
+  });
+  document.getElementById('news-count').textContent = `${filtered.length} events`;
+  if (!filtered.length) {
+    document.getElementById('news-list').innerHTML = '<div class="loading"><p>No events found.</p></div>';
+    return;
+  }
+  const catIcon = {conflict:'🔫',energy:'⚡',economy:'💹',disaster:'🌀',world:'🌍'};
+  document.getElementById('news-list').innerHTML = filtered.map(a => `
+    <div class="news-item" onclick="window.open('${a.link}','_blank')">
+      <div class="sev-bar sev-${a.severity}"></div>
+      <div>
+        <div class="news-title">${a.title}</div>
+        <div class="news-meta">
+          <span class="news-source">${a.source}</span>
+          <span class="news-time">${a.time||'Recently'}</span>
+          <span class="news-cat">${catIcon[a.category]||'📰'} ${a.category}</span>
+          ${a.affected&&a.affected.length?`<span class="news-impact">⚡ ${a.affected[0]}</span>`:''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCommodities(data) {
+  document.getElementById('commodity-grid').innerHTML = data.map(c => `
+    <div class="comm-card">
+      <div class="comm-icon">${c.icon}</div>
+      <div class="comm-name">${c.name}</div>
+      <div class="comm-price">${c.price}</div>
+      <span class="impact-badge impact-${c.triggered?c.impact:'low'}">${c.triggered?c.impact:'stable'}</span>
+      <div class="comm-reason">${c.triggered?c.reason:'No immediate impact detected'}</div>
+      ${c.triggered?`<a href="${c.link}" target="_blank" class="comm-btn">🛒 ${c.action}</a>`:''}
+    </div>
+  `).join('');
+  document.getElementById('s-recs').textContent = data.filter(c=>c.triggered).length;
+}
+
+function renderRecommendations(data) {
+  const triggered = data.filter(c => c.triggered);
+  document.getElementById('rec-count').textContent = `${triggered.length} alerts`;
+  if (!triggered.length) {
+    document.getElementById('rec-list').innerHTML = '<div class="loading"><p style="color:var(--green)">✅ Market stable. No alerts.</p></div>';
+    return;
+  }
+  const urgMap = {critical:'now',high:'soon',medium:'soon'};
+  document.getElementById('rec-list').innerHTML = triggered.map(c => `
+    <div class="rec-item">
+      <div class="rec-top">
+        <span class="rec-name">${c.icon} ${c.name}</span>
+        <span class="rec-urg urg-${urgMap[c.impact]||'soon'}">${c.impact==='critical'?'BUY NOW':'BUY SOON'}</span>
+      </div>
+      <div class="rec-reason">${c.reason}. Current: <strong>${c.price}</strong></div>
+      <a href="${c.link}" target="_blank" class="rec-btn">🛒 ${c.action} →</a>
+    </div>
+  `).join('');
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = allNews.length;
+  document.getElementById('s-critical').textContent = allNews.filter(a=>a.severity==='critical').length;
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNews();
+}
+
+function filterNews() { renderNews(); }
+
+loadNews();
+loadCommodities();
+setInterval(() => { loadNews(); loadCommodities(); }, 300000);
+</script>
+</body>
+</html>

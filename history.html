@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>GeoAlert — Alert History</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#080c10;--surf:#0e1419;--surf2:#141c24;--border:#1e2d3d;--accent:#f5a623;--red:#ff4455;--orange:#ff7a2f;--yellow:#ffd166;--green:#06d6a0;--text:#d4e4f7;--muted:#5a7a99;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+header{background:rgba(8,12,16,0.95);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);}
+.back-btn{color:var(--muted);text-decoration:none;font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border:1px solid var(--border);border-radius:6px;transition:all 0.2s;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+.main{max-width:1000px;margin:0 auto;padding:28px 24px;}
+.sec-head{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;}
+table{width:100%;border-collapse:collapse;background:var(--surf);border-radius:12px;overflow:hidden;}
+th{background:var(--surf2);padding:12px 16px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);}
+td{padding:12px 16px;font-size:12px;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surf2);}
+.sev{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:1px;}
+.sev-critical{background:rgba(255,68,85,0.15);color:var(--red);border:1px solid rgba(255,68,85,0.3);}
+.sev-high{background:rgba(255,122,47,0.15);color:var(--orange);border:1px solid rgba(255,122,47,0.3);}
+.sev-medium{background:rgba(255,209,102,0.15);color:var(--yellow);border:1px solid rgba(255,209,102,0.3);}
+.sev-normal{background:rgba(6,214,160,0.1);color:var(--green);border:1px solid rgba(6,214,160,0.3);}
+.source{font-family:'DM Mono',monospace;font-size:10px;color:#3b9eff;}
+.time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer{border-top:1px solid var(--border);padding:16px 32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:40px;}
+footer span{color:var(--accent);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">🌐 GeoAlert</div>
+  <a href="/" class="back-btn">← Back to Dashboard</a>
+</header>
+<div class="main">
+  <div class="sec-head">Alert History (Last 50 Events)</div>
+  <div id="content">
+    <div class="loading"><div class="spinner"></div><p>Loading history...</p></div>
+  </div>
+</div>
+<footer>GeoAlert &mdash; <span>MCA Major Project</span> &mdash; Alert History</footer>
+<script>
+async function loadHistory() {
+  try {
+    const res = await fetch('/api/history');
+    const data = await res.json();
+    if (!data.length) {
+      document.getElementById('content').innerHTML = '<div class="loading"><p>No history yet. Go to dashboard and refresh news first!</p></div>';
+      return;
+    }
+    document.getElementById('content').innerHTML = `
+      <table>
+        <thead><tr><th>Title</th><th>Source</th><th>Category</th><th>Severity</th><th>Time</th></tr></thead>
+        <tbody>${data.map(r=>`
+          <tr>
+            <td>${r.title}</td>
+            <td><span class="source">${r.source}</span></td>
+            <td>${r.category}</td>
+            <td><span class="sev sev-${r.severity}">${r.severity}</span></td>
+            <td><span class="time">${r.time}</span></td>
+          </tr>
+        `).join('')}</tbody>
+      </table>`;
+  } catch(e) {
+    document.getElementById('content').innerHTML = '<div class="loading"><p>Error loading history.</p></div>';
+  }
+}
+loadHistory();
+</script>
+</body>
+</html>
